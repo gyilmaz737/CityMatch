@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Match - created by gurkan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #f5f5f7;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(50px);
+            -webkit-backdrop-filter: blur(50px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Fütüristik İmza */
+        .signature-container {
+            margin-top: 0.5rem;
+            display: inline-block;
+        }
+        
+        .signature-text {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0.9;
+        }
+
+        /* Asimetrik Slider Mühendisliği */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            height: 40px;
+            cursor: pointer;
+            z-index: 10;
+            position: relative;
+        }
+
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #333 0%, #4f46e5 50%, #333 100%);
+            border-radius: 2px;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 32px;
+            width: 32px;
+            border-radius: 50%;
+            background: #fff;
+            margin-top: -14px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            transition: transform 0.1s;
+            border: 2px solid white;
+        }
+
+        .place-link { transition: all 0.2s ease; }
+        .place-link:hover { background: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
+
+        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .score-display {
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black">
+    
+    <div class="w-full max-w-3xl relative z-10">
+        
+        <div class="text-center mb-10 fade-in">
+            <h1 class="text-6xl md:text-7xl font-black text-white tracking-tighter">
+                City Match
+            </h1>
+            <div class="signature-container">
+                <div class="signature-text">created by gurkan</div>
+            </div>
+        </div>
+
+        <div id="intro-screen" class="glass-panel p-10 md:p-14 text-center border-t border-white/5">
+            <div class="mb-8 text-gray-400 text-lg leading-relaxed font-light">
+                <p>Bu algoritma, Avrupa'nın 30 ikonik şehri arasından senin <strong>ruh eşini</strong> bulmak için tasarlandı.</p>
+                <br>
+                <p>Doğa yürüyüşleri yok. Plaj yok. Sadece şehrin ritmi, mimarisi ve karakteri var. Hazırsan başlayalım.</p>
+            </div>
+            <button onclick="startQuiz()" class="px-12 py-4 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                Analizi Başlat
+            </button>
+        </div>
+
+        <div id="quiz-screen" class="glass-panel p-8 md:p-12 hidden relative">
+            <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-4">
+                <div class="flex items-baseline gap-2">
+                    <span class="text-base font-bold tracking-widest text-indigo-400 uppercase">SORU</span>
+                    <span class="text-2xl font-mono font-bold text-white"><span id="q-current">1</span><span class="text-gray-600 text-lg">/15</span></span>
+                </div>
+                <div class="w-32 md:w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-[6%] transition-all duration-500"></div>
+                </div>
+            </div>
+
+            <div class="min-h-[100px] flex items-center justify-center mb-10">
+                <h3 id="question-text" class="text-2xl md:text-4xl font-semibold text-center leading-tight text-white tracking-tight">
+                    Soru yükleniyor...
+                </h3>
+            </div>
+
+            <div class="mb-8 px-2">
+                <div class="text-center mb-6">
+                    <span id="current-val" class="score-display text-8xl md:text-9xl font-black text-white tracking-tighter">5</span>
+                </div>
+                <div class="relative h-8 flex items-center">
+                    <input type="range" id="rating-slider" min="0" max="1000" value="500" step="1" oninput="updateVal(this.value)">
+                </div>
+                <div class="flex justify-between text-xs font-bold uppercase tracking-widest mt-4">
+                    <span id="label-left" class="text-gray-600">Asla</span>
+                    <span id="slider-feedback" class="text-indigo-400 opacity-0 transition-opacity">Nötr</span>
+                    <span id="label-right" class="text-gray-600">Kesinlikle</span>
+                </div>
+            </div>
+
+            <button onclick="nextQuestion()" class="w-full py-4 mt-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold transition flex items-center justify-center gap-2 group">
+                Onayla <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-indigo-400"></i>
+            </button>
+        </div>
+
+        <div id="loading-screen" class="hidden text-center py-32 glass-panel">
+            <div class="w-16 h-16 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+            <h2 class="text-2xl font-bold text-white mb-2">Veriler İşleniyor</h2>
+            <div class="signature-text">analyzing vectors</div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <div class="glass-panel p-8 md:p-10 mb-6 border-t-4 border-t-indigo-500 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded text-[10px] font-bold tracking-[0.2em] uppercase border border-indigo-500/30">Perfect Match</div>
+                    <span class="text-5xl font-black text-white tracking-tighter" id="winner-match">%98</span>
+                </div>
+                <h1 id="winner-name" class="text-6xl md:text-8xl font-black text-white mb-1 tracking-tighter">ŞEHİR</h1>
+                <h2 id="winner-country" class="text-2xl text-gray-500 mb-8 font-light tracking-wide uppercase">ÜLKE</h2>
+                <div class="bg-white/5 border-l-2 border-indigo-500 p-6 rounded-r-xl mb-8 backdrop-blur-sm">
+                    <p id="winner-desc" class="text-gray-300 text-lg leading-relaxed font-light">Açıklama...</p>
+                </div>
+                <h3 class="text-gray-500 font-bold text-xs uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-location-arrow"></i> Keşif Noktaları (Tıkla & Git)
+                </h3>
+                <div id="winner-places" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="alternatives-grid"></div>
+            <button onclick="location.reload()" class="w-full mt-8 py-5 bg-white/5 border border-white/5 text-gray-400 rounded-2xl font-bold hover:text-white transition text-sm">Yeniden Analiz Et</button>
+            <div class="text-center mt-8 pb-4"><div class="signature-text">created by gurkan</div></div>
+        </div>
+    </div>
+
+    <script>
+        const cities = [
+            { name: "Londra", country: "İngiltere", scores: [8, 9, 7, 8, 9, 9], desc: "Dünyanın kavşak noktası. Geleneksel kraliyet dokusu ile ultra-modern finans dünyasının, lüksün ve kaosun iç içe geçtiği kozmopolit bir dev.", places: ["British Museum", "Tate Modern", "Soho", "Covent Garden", "Sky Garden"], reason: "Kaos, tarih ve modernizmin mükemmel dengesini arıyorsanız adresiniz burası." },
+            { name: "Berlin", country: "Almanya", scores: [9, 6, 6, 10, 5, 10], desc: "Avrupa'nın asi çocuğu. 'Yoksul ama seksi'. Özgürlükçü ruhu, tekno kulüpleri, sokak sanatı ve yakın tarihin ağır izleriyle yaşayan, asla uyumayan bir şehir.", places: ["East Side Gallery", "Berghain", "Brandenburg Kapısı", "Müzeler Adası", "Kreuzberg"], reason: "Kurallardan sıkıldıysanız ve bohem bir özgürlük arıyorsanız Berlin sizi çağırıyor." },
+            { name: "Paris", country: "Fransa", scores: [10, 7, 6, 8, 10, 7], desc: "Estetik ve zarafetin başkenti. Her köşesi bir sanat eseri gibi olan, melankolik ama büyüleyici, entelektüel derinliği yüksek ve lüksün standart olduğu bir klasik.", places: ["Louvre Müzesi", "Le Marais", "Montmartre", "Musée d'Orsay", "Palais Garnier"], reason: "Estetik kaygınız yüksekse ve sanatsal bir derinlik arıyorsanız Paris kaçınılmazdır." },
+            { name: "Roma", country: "İtalya", scores: [10, 4, 9, 5, 7, 8], desc: "Sonsuz Şehir. Açık hava müzesi niteliğinde, kaosun ve tarihin, tutkunun ve kargaşanın iç içe geçtiği bir Akdeniz efsanesi.", places: ["Kolezyum", "Pantheon", "Trastevere", "Vatikan Müzeleri", "Trevi Çeşmesi"], reason: "Tarihin içinde kaybolmak ve güneyin sıcak kaosunu yaşamak istiyorsanız Roma ideal." },
+            { name: "Viyana", country: "Avusturya", scores: [9, 9, 2, 4, 8, 5], desc: "Aristokrasinin ve düzenin kalesi. Klasik müzik, görkemli saraylar, tertemiz caddeler ve ağırbaşlı kahve kültürü.", places: ["Schönbrunn Sarayı", "Viyana Devlet Operası", "Belvedere Sarayı", "Kunsthistorisches Museum", "Prater"], reason: "Kaostan nefret ediyor, düzen, sanat ve kalite arıyorsanız Viyana sizin şehriniz." },
+            { name: "Amsterdam", country: "Hollanda", scores: [8, 8, 5, 9, 6, 8], desc: "Kanalların ve özgürlüğün şehri. Hem son derece düzenli ve modern, hem de bir o kadar çılgın ve toleranslı.", places: ["Rijksmuseum", "Van Gogh Müzesi", "Jordaan", "Vondelpark", "Anne Frank Evi"], reason: "Hem medeni bir düzen hem de sınırsız bir özgürlük arayışındaysanız Amsterdam tam size göre." },
+            { name: "Barselona", country: "İspanya", scores: [7, 7, 7, 7, 6, 10], desc: "Gaudi'nin rüyası. Mimari deha ile Akdeniz'in rahatlığının birleşimi. Enerjisi hiç düşmeyen bir festival şehri.", places: ["Sagrada Familia", "Park Güell", "Gotik Mahalle", "Casa Batlló", "El Born"], reason: "Mimari güzellik ile bitmeyen gece hayatını ve sosyal enerjiyi birleştirmek istiyorsanız seçmelisiniz." },
+            { name: "İstanbul", country: "Türkiye", scores: [9, 6, 10, 6, 7, 9], desc: "İki kıtanın ve binlerce yılın özeti. Büyüleyici bir kaos, melankolik bir boğaz manzarası ve katman katman tarih.", places: ["Ayasofya", "Topkapı Sarayı", "Galata Kulesi", "Karaköy", "Yerebatan Sarnıcı"], reason: "Gerçek bir metropol kaosu ve derin bir tarih duygusu arıyorsanız İstanbul ruh eşinizdir." },
+            { name: "Zürih", country: "İsviçre", scores: [5, 10, 1, 3, 10, 4], desc: "Zenginliğin ve huzurun başkenti. Saat gibi işleyen sistemler, tertemiz sokaklar, lüks butikler ve mutlak güvenlik.", places: ["Bahnhofstrasse", "Zürih Gölü", "Old Town", "Kunsthaus", "Uetliberg"], reason: "Sürprizlerden hoşlanmıyor, lüks, güven ve mutlak düzen istiyorsanız Zürih." },
+            { name: "Prag", country: "Çekya", scores: [9, 6, 5, 7, 5, 8], desc: "Orta Çağ masalı. Gotik kuleler, Arnavut kaldırımları ve mistik bir atmosfer.", places: ["Karl Köprüsü", "Prag Kalesi", "Astronomik Saat", "Old Town Square", "Kafka Müzesi"], reason: "Gotik mimari ve masalsı, biraz da melankolik bir atmosfer sizi çekiyorsa Prag doğru adres." },
+            { name: "Kopenhag", country: "Danimarka", scores: [7, 10, 2, 6, 8, 6], desc: "Tasarım ve yaşam kalitesi. Minimalist estetik, sürdürülebilir yaşam ve yüksek medeniyet.", places: ["Nyhavn", "Tivoli", "Christiania", "Amalienborg", "Designmuseum"], reason: "Tasarım, modernite ve yüksek yaşam standartları önceliğinizse Kopenhag'ı seveceksiniz." },
+            { name: "Budapeşte", country: "Macaristan", scores: [8, 6, 5, 8, 5, 9], desc: "Tuna'nın İncisi. Gündüz imparatorluk ihtişamı, gece harabe barlar kültürü.", places: ["Parlamento", "Balıkçı Tabyası", "Széchenyi Hamamı", "Szimpla Kert", "Zincirli Köprü"], reason: "Gündüz tarih, gece ise salaş ve özgün bir eğlence arıyorsanız Budapeşte." },
+            { name: "Lizbon", country: "Portekiz", scores: [7, 5, 4, 8, 4, 8], desc: "Yedi tepeli nostalji. Pastel renkli binalar, melankolik Fado müziği, okyanus esintisi.", places: ["Belém Kulesi", "Alfama", "Tramvay 28", "LX Factory", "Miradouro"], reason: "Samimiyet, nostalji ve bohem bir rahatlık arıyorsanız Lizbon size iyi gelecek." },
+            { name: "Floransa", country: "İtalya", scores: [10, 5, 4, 4, 7, 5], desc: "Rönesans'ın beşiği. Michelangelo ve Da Vinci'nin ruhunun dolaştığı estetik zirvesi.", places: ["Uffizi Galerisi", "Duomo", "Ponte Vecchio", "Accademia", "Michelangelo Tepesi"], reason: "Sanat ve estetik sizin için her şeyden önemliyse Floransa tek seçenektir." },
+            { name: "Dublin", country: "İrlanda", scores: [6, 7, 5, 5, 5, 10], desc: "Edebiyat ve pub kültürü. Dünyanın en sıcakkanlı insanları, canlı müzik ve bitmeyen sosyal enerji.", places: ["Temple Bar", "Guinness Storehouse", "Trinity College", "St Stephen's Green", "Kilmainham Gaol"], reason: "Lüks değil samimiyet, sessizlik değil neşeli bir kalabalık arıyorsanız Dublin." },
+            { name: "Stokholm", country: "İsveç", scores: [7, 10, 2, 5, 8, 5], desc: "Kuzeyin Venedik'i. Teknoloji ve doğanın, tarih ve modernitenin kusursuz uyumu.", places: ["Gamla Stan", "Vasa Müzesi", "Skansen", "Stockholm Sarayı", "Fotografiska"], reason: "Serin bir iklim, şık insanlar ve kusursuz bir şehir düzeni ilginizi çekiyorsa Stokholm." },
+            { name: "Atina", country: "Yunanistan", scores: [9, 4, 8, 6, 5, 9], desc: "Batı'nın temeli. Antik kalıntılarla dolu tepeler ile dinamik modern sokakların karışımı.", places: ["Akropolis", "Plaka", "Monastiraki", "Arkeoloji Müzesi", "Likavittos"], reason: "Antik tarihle modern kaosun ve sokak lezzetlerinin karışımını seviyorsanız Atina." },
+            { name: "Edinburg", country: "İskoçya", scores: [9, 7, 3, 6, 6, 7], desc: "Karanlık ve büyüleyici. Volkanik kayalar üzerine kurulu kaleler ve gotik mimari.", places: ["Edinburgh Kalesi", "Royal Mile", "Victoria Street", "Arthur's Seat", "National Museum"], reason: "Mistik, gotik ve biraz da karanlık bir atmosfer sizi çekiyorsa Edinburgh." },
+            { name: "Münih", country: "Almanya", scores: [7, 9, 3, 3, 8, 8], desc: "Bavyera'nın kalbi. Geleneksel ile modernin buluşması. Zengin, güvenli ve keyifli.", places: ["Marienplatz", "English Garden", "Nymphenburg", "BMW Müzesi", "Viktualienmarkt"], reason: "Alman disiplini ile yaşamdan keyif alma sanatını bir arada görmek istiyorsanız Münih." },
+            { name: "Milano", country: "İtalya", scores: [7, 8, 7, 4, 10, 8], desc: "Moda ve finans. İtalya'nın en çalışkan, en şık ve en hızlı şehri.", places: ["Duomo", "Galleria Vittorio", "Sforzesco", "Brera", "Navigli"], reason: "Moda, tasarım, alışveriş ve hızlı bir şehir hayatı arıyorsanız Milano." },
+            { name: "Lyon", country: "Fransa", scores: [8, 7, 4, 5, 6, 10], desc: "Gastronomi başkenti. Paris kadar şık ama daha samimi. Dünyanın en iyi mutfağı.", places: ["Vieux Lyon", "Notre-Dame de Fourvière", "Parc de la Tête d'Or", "Les Halles", "Confluences"], reason: "Seyahat motivasyonunuzun merkezinde yemek kültürü ve iyi yaşam varsa Lyon." },
+            { name: "Venedik", country: "İtalya", scores: [9, 3, 5, 4, 9, 4], desc: "Zamanın durduğu yer. Araba yok, sadece sular ve saraylar var.", places: ["San Marco", "Rialto", "Büyük Kanal", "Dükler Sarayı", "Libreria Acqua Alta"], reason: "Modern dünyadan tamamen kopup, eşsiz bir atmosferde kaybolmak istiyorsanız Venedik." },
+            { name: "Hamburg", country: "Almanya", scores: [6, 9, 5, 7, 7, 8], desc: "Kuzeyin kapısı. Liman endüstrisi, zengin villalar ve çılgın gece hayatı.", places: ["Miniatur Wunderland", "Elbphilharmonie", "Speicherstadt", "Reeperbahn", "Planten un Blomen"], reason: "Endüstriyel estetik, liman havası ve canlı gece hayatı ilginizi çekiyorsa Hamburg." },
+            { name: "Porto", country: "Portekiz", scores: [8, 5, 4, 7, 4, 7], desc: "Şarabın ve nehrin şehri. Lizbon'dan daha melankolik ve karizmatik.", places: ["Ribeira", "Dom Luís I", "Livraria Lello", "Clérigos Kulesi", "Porto Katedrali"], reason: "Melankolik, romantik ve şarap kokulu tarihi sokaklar arıyorsanız Porto." },
+            { name: "Brüksel", country: "Belçika", scores: [7, 7, 5, 5, 6, 7], desc: "Avrupa'nın başkenti. Çikolata kokusu ve Art Nouveau mimarisi.", places: ["Grand Place", "Atomium", "Manneken Pis", "Magritte Müzesi", "Royal Gallery"], reason: "Çikolata, bira, sanat ve Avrupa'nın merkezinde olmak istiyorsanız Brüksel." },
+            { name: "Napoli", country: "İtalya", scores: [9, 1, 10, 6, 3, 9], desc: "Gerçek İtalya. Gürültülü, kirli ama inanılmaz derecede canlı. Pizza'nın doğduğu yer.", places: ["Spaccanapoli", "Arkeoloji Müzesi", "Castel dell'Ovo", "Plebiscite", "Sansevero"], reason: "Steril şehirlerden sıkıldıysanız ve saf bir yaşam enerjisi arıyorsanız Napoli." },
+            { name: "Madrid", country: "İspanya", scores: [9, 7, 6, 5, 7, 10], desc: "Kraliyet ve Fiesta. Görkemli bulvarlar, dünya çapında müzeler ve bitmeyen sosyal hayat.", places: ["Prado Müzesi", "Retiro Parkı", "Royal Palace", "Plaza Mayor", "Gran Vía"], reason: "Sanat dolu gündüzleri hareketli ve sosyal gecelerle birleştirmek istiyorsanız Madrid." },
+            { name: "Oslo", country: "Norveç", scores: [6, 10, 1, 4, 9, 4], desc: "Fiyortların kıyısında, minimalist mimarinin ve sanatın buluştuğu sakin başkent.", places: ["Vigeland", "Munch Müzesi", "Opera Binası", "Akershus", "Viking Müzesi"], reason: "Sessizlik, ferahlık ve modern İskandinav sanatı arıyorsanız Oslo." },
+            { name: "Sevilla", country: "İspanya", scores: [9, 5, 5, 6, 5, 9], desc: "Endülüs ateşi. Flamenko, portakal ağaçları ve Mağribi sarayları.", places: ["Alcázar", "Plaza de España", "Katedral", "Santa Cruz", "Metropol Parasol"], reason: "Oryantalist bir tarih, sıcakkanlı insanlar ve flamenko ruhu arıyorsanız Sevilla." },
+            { name: "Cenevre", country: "İsviçre", scores: [6, 10, 1, 2, 10, 4], desc: "Diplomasinin merkezi. Göl kenarında, lüks ve sessiz bir sükunet.", places: ["Jet d'Eau", "Katedral", "Palais des Nations", "Patek Philippe Müzesi", "Jardin Anglais"], reason: "Entelektüel bir sükunet, lüks ve göl manzaralı bir dinginlik arıyorsanız Cenevre." }
+        ];
+
+        const questions = [
+            { text: "Tatil, benim için yeni şeyler öğrenmek ve entelektüel olarak beslenmektir; sadece dinlenmek yetmez.", weights: {0: 2.0} },
+            { text: "Eski, yıpranmış ve hikayesi olan binalar, beni yeni ve parlak gökdelenlerden daha çok etkiler.", weights: {0: 1.5, 1: -1.0} },
+            { text: "Gittiğim şehirde her şeyin saat gibi işlemesini, sokakların tertemiz ve güvenli olmasını isterim.", weights: {1: 2.0, 2: -1.5} },
+            { text: "Kuralların olmadığı, insanların sokaklara taştığı, gürültülü ve kaotik ortamlar bana yaşadığımı hissettirir.", weights: {2: 2.0, 1: -1.5} },
+            { text: "Lüks bir restoranda beyaz örtülü masalarda yemek yemektense, salaş bir sokak lezzetini ayakta yemeyi tercih ederim.", weights: {3: 1.5, 4: -1.5} },
+            { text: "Şehrin duvarlarındaki graffitiler, terk edilmiş binalar ve alternatif sanat alanları ilgimi çeker.", weights: {3: 2.0, 4: -1.0} },
+            { text: "Konfor benim kırmızı çizgimdir. Şehri gezerken veya konaklarken bütçeyi düşünmem, kalite ararım.", weights: {4: 2.0, 3: -1.0} },
+            { text: "Tanımadığım insanlarla sohbet etmek, kalabalık barlarda vakit geçirmek ve sosyalleşmek seyahatin amacıdır.", weights: {5: 2.0} },
+            { text: "Gece hayatı dendiğinde aklıma sakin bir şarap evi değil, sabaha kadar süren kulüpler veya partiler gelir.", weights: {5: 1.5, 2: 1.0} },
+            { text: "Bir şehirde 'vitrin' ve alışveriş olanakları (moda, teknoloji) benim için tarihi eserler kadar önemlidir.", weights: {4: 1.5, 1: 1.0} },
+            { text: "Geçmişin melankolisi ve hüzünlü atmosferi (mezarlıklar, gotik yapılar) beni çeker.", weights: {0: 1.0, 3: 1.0, 5: -0.5} },
+            { text: "Teknoloji, inovasyon ve fütüristik tasarımlar beni heyecanlandırır; geçmişe takılıp kalmamalıyız.", weights: {1: 2.0, 0: -0.5} },
+            { text: "Biraz tekinsiz, karanlık veya 'underground' yerler, steril turist bölgelerinden daha gerçektir.", weights: {2: 1.0, 3: 1.5, 1: -1.0} },
+            { text: "Müze gezmektense, şehrin meydanında oturup saatlerce insanları izlemeyi tercih ederim.", weights: {5: 1.5, 0: -0.5} },
+            { text: "Şehirde aristokratik bir hava, görkemli saraylar ve klasik bir ağırlık olmalı.", weights: {0: 1.0, 4: 1.0, 3: -1.0} }
+        ];
+
+        let userVector = [5, 5, 5, 5, 5, 5]; 
+        let currentQIndex = 0;
+
+        function startQuiz() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQIndex];
+            document.getElementById('q-current').innerText = currentQIndex + 1;
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('rating-slider').value = 500;
+            updateVal(500);
+            document.getElementById('progress-bar').style.width = `${(currentQIndex / questions.length) * 100}%`;
+        }
+
+        function updateVal(val) {
+            let score = (val <= 500) ? 1 + (val / 500) * 4 : 5 + ((val - 500) / 500) * 5;
+            let final = Math.round(score);
+            document.getElementById('current-val').innerText = final;
+            const feedback = document.getElementById('slider-feedback');
+            feedback.style.opacity = '1';
+            feedback.innerText = (final <= 2) ? "Asla" : (final <= 4) ? "Pek Değil" : (final <= 6) ? "Nötr" : (final <= 8) ? "Katılıyorum" : "Kesinlikle";
+        }
+
+        function nextQuestion() {
+            let val = parseInt(document.getElementById('current-val').innerText);
+            let q = questions[currentQIndex];
+            let multiplier = (val - 5) / 2.5;
+            for (let i in q.weights) {
+                userVector[i] += q.weights[i] * multiplier;
+                userVector[i] = Math.max(0, Math.min(10, userVector[i]));
+            }
+            currentQIndex++;
+            if (currentQIndex < questions.length) loadQuestion();
+            else showResults();
+        }
+
+        function showResults() {
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('result-screen').classList.remove('hidden');
+                const results = cities.map(c => {
+                    let d = Math.sqrt(c.scores.reduce((a, s, i) => a + Math.pow(s - userVector[i], 2), 0));
+                    return { ...c, match: Math.max(0, 100 - (d / 20 * 100)) };
+                }).sort((a, b) => b.match - a.match);
+                
+                const w = results[0];
+                document.getElementById('winner-name').innerText = w.name;
+                document.getElementById('winner-country').innerText = w.country;
+                document.getElementById('winner-match').innerText = `%${Math.round(w.match)}`;
+                document.getElementById('winner-desc').innerText = w.desc;
+                document.getElementById('winner-places').innerHTML = w.places.map(p => `
+                    <a href="https://www.google.com/maps/search/${encodeURIComponent(p + ' ' + w.name)}" target="_blank" class="place-link flex items-center p-3 bg-white/5 rounded-lg border border-white/5">
+                        <i class="fa-solid fa-location-dot text-indigo-400 mr-3"></i><span class="text-sm text-gray-200">${p}</span>
+                    </a>`).join('');
+                
+                document.getElementById('alternatives-grid').innerHTML = results.slice(1, 5).map(a => `
+                    <div class="glass-panel p-6 border-l-2 border-indigo-500">
+                        <div class="flex justify-between mb-2"><h4 class="text-xl font-bold text-white">${a.name}</h4><span class="text-indigo-400 font-mono">%${Math.round(a.match)}</span></div>
+                        <p class="text-xs text-gray-400">${a.reason}</p>
+                    </div>`).join('');
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
