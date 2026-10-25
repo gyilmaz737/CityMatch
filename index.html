@@ -1,180 +1,23 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>City Match - created by gurkan</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@400;700&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #050505;
-            color: #f5f5f7;
-            overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.7);
-            backdrop-filter: blur(50px);
-            -webkit-backdrop-filter: blur(50px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 32px;
-            box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Fütüristik İmza */
-        .signature-container {
-            margin-top: 0.5rem;
-            display: inline-block;
-        }
-        
-        .signature-text {
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 0.3em;
-            text-transform: uppercase;
-            font-size: 0.65rem;
-            background: linear-gradient(90deg, #818cf8, #c084fc, #f472b6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            opacity: 0.9;
-        }
-
-        /* Asimetrik Slider Mühendisliği */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            height: 40px;
-            cursor: pointer;
-            z-index: 10;
-            position: relative;
-        }
-
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #333 0%, #4f46e5 50%, #333 100%);
-            border-radius: 2px;
-        }
-
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 32px;
-            width: 32px;
-            border-radius: 50%;
-            background: #fff;
-            margin-top: -14px;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-            transition: transform 0.1s;
-            border: 2px solid white;
-        }
-
-        .place-link { transition: all 0.2s ease; }
-        .place-link:hover { background: rgba(255, 255, 255, 0.1); transform: translateX(5px); }
-
-        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .score-display {
-            font-variant-numeric: tabular-nums;
-            text-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
-        }
-    </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black">
-    
-    <div class="w-full max-w-3xl relative z-10">
-        
-        <div class="text-center mb-10 fade-in">
-            <h1 class="text-6xl md:text-7xl font-black text-white tracking-tighter">
-                City Match
-            </h1>
-            <div class="signature-container">
-                <div class="signature-text">created by gurkan</div>
-            </div>
-        </div>
-
-        <div id="intro-screen" class="glass-panel p-10 md:p-14 text-center border-t border-white/5">
-            <div class="mb-8 text-gray-400 text-lg leading-relaxed font-light">
-                <p>Bu algoritma, Avrupa'nın 30 ikonik şehri arasından senin <strong>ruh eşini</strong> bulmak için tasarlandı.</p>
-                <br>
-                <p>Doğa yürüyüşleri yok. Plaj yok. Sadece şehrin ritmi, mimarisi ve karakteri var. Hazırsan başlayalım.</p>
-            </div>
-            <button onclick="startQuiz()" class="px-12 py-4 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition transform hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                Analizi Başlat
-            </button>
-        </div>
-
-        <div id="quiz-screen" class="glass-panel p-8 md:p-12 hidden relative">
-            <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-4">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-base font-bold tracking-widest text-indigo-400 uppercase">SORU</span>
-                    <span class="text-2xl font-mono font-bold text-white"><span id="q-current">1</span><span class="text-gray-600 text-lg">/15</span></span>
-                </div>
-                <div class="w-32 md:w-48 h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                    <div id="progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 w-[6%] transition-all duration-500"></div>
-                </div>
-            </div>
-
-            <div class="min-h-[100px] flex items-center justify-center mb-10">
-                <h3 id="question-text" class="text-2xl md:text-4xl font-semibold text-center leading-tight text-white tracking-tight">
-                    Soru yükleniyor...
-                </h3>
-            </div>
-
-            <div class="mb-8 px-2">
-                <div class="text-center mb-6">
-                    <span id="current-val" class="score-display text-8xl md:text-9xl font-black text-white tracking-tighter">5</span>
-                </div>
-                <div class="relative h-8 flex items-center">
-                    <input type="range" id="rating-slider" min="0" max="1000" value="500" step="1" oninput="updateVal(this.value)">
-                </div>
-                <div class="flex justify-between text-xs font-bold uppercase tracking-widest mt-4">
-                    <span id="label-left" class="text-gray-600">Asla</span>
-                    <span id="slider-feedback" class="text-indigo-400 opacity-0 transition-opacity">Nötr</span>
-                    <span id="label-right" class="text-gray-600">Kesinlikle</span>
-                </div>
-            </div>
-
-            <button onclick="nextQuestion()" class="w-full py-4 mt-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-bold transition flex items-center justify-center gap-2 group">
-                Onayla <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-indigo-400"></i>
-            </button>
-        </div>
-
-        <div id="loading-screen" class="hidden text-center py-32 glass-panel">
-            <div class="w-16 h-16 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-            <h2 class="text-2xl font-bold text-white mb-2">Veriler İşleniyor</h2>
-            <div class="signature-text">analyzing vectors</div>
-        </div>
-
-        <div id="result-screen" class="hidden">
-            <div class="glass-panel p-8 md:p-10 mb-6 border-t-4 border-t-indigo-500 relative overflow-hidden">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded text-[10px] font-bold tracking-[0.2em] uppercase border border-indigo-500/30">Perfect Match</div>
-                    <span class="text-5xl font-black text-white tracking-tighter" id="winner-match">%98</span>
-                </div>
-                <h1 id="winner-name" class="text-6xl md:text-8xl font-black text-white mb-1 tracking-tighter">ŞEHİR</h1>
-                <h2 id="winner-country" class="text-2xl text-gray-500 mb-8 font-light tracking-wide uppercase">ÜLKE</h2>
-                <div class="bg-white/5 border-l-2 border-indigo-500 p-6 rounded-r-xl mb-8 backdrop-blur-sm">
-                    <p id="winner-desc" class="text-gray-300 text-lg leading-relaxed font-light">Açıklama...</p>
-                </div>
-                <h3 class="text-gray-500 font-bold text-xs uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-location-arrow"></i> Keşif Noktaları (Tıkla & Git)
-                </h3>
-                <div id="winner-places" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="alternatives-grid"></div>
-            <button onclick="location.reload()" class="w-full mt-8 py-5 bg-white/5 border border-white/5 text-gray-400 rounded-2xl font-bold hover:text-white transition text-sm">Yeniden Analiz Et</button>
-            <div class="text-center mt-8 pb-4"><div class="signature-text">created by gurkan</div></div>
-        </div>
-    </div>
-
-    <script>
-        const cities = [
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0b1020"><title>City Match | GurkanLab</title><meta name="description" content="15 soruda seyahat karakterini keşfet. 30 Avrupa şehri arasından sana en uygun şehirleri bul.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+:root{font-family:Inter,system-ui,-apple-system,sans-serif;color-scheme:dark;--bg:#090e1a;--card:#121a2b;--line:#29354b;--text:#eef3ff;--muted:#9baac3;--accent:#818cf8;--accent2:#a78bfa;--soft:#1b2540;--glow:rgba(129,140,248,.16)}
+[data-theme=light]{color-scheme:light;--bg:#f5f7fc;--card:#fff;--line:#dee5f1;--text:#182139;--muted:#5c6880;--accent:#504bdf;--accent2:#7c3aed;--soft:#f0f1ff;--glow:rgba(80,75,223,.10)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 70% 0,var(--glow),transparent 47%),var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}button,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:3px}button:disabled{opacity:.4;cursor:not-allowed}
+.wrap{max-width:860px;margin:auto;padding:22px 18px 55px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:45px}.brand{font-weight:900;letter-spacing:-.05em;font-size:23px;text-decoration:none;color:var(--text)}.brand span{color:var(--accent)}.topright{display:flex;align-items:center;gap:9px}.pill{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:999px;padding:11px 14px;font-size:13px;font-weight:700;text-decoration:none}
+.hero{text-align:center;margin-bottom:28px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.17em;font-weight:800;color:var(--accent)}h1{font-size:clamp(43px,9vw,72px);letter-spacing:-.065em;line-height:1.05;margin:13px 0}.sub{line-height:1.65;color:var(--muted);max-width:590px;margin:14px auto 0;font-size:16px}.card{border:1px solid var(--line);background:var(--card);border-radius:25px;padding:clamp(22px,5vw,42px);box-shadow:0 25px 55px rgba(0,0,0,.08)}.hidden{display:none!important}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:27px 0}.feature{background:var(--soft);border-radius:14px;padding:15px 7px;text-align:center}.feature b{font-size:19px;display:block}.feature small{color:var(--muted);font-size:11px}.primary{border:none;background:linear-gradient(100deg,var(--accent),var(--accent2));color:#fff;border-radius:14px;padding:17px 24px;font-weight:800;font-size:15px;width:100%}.secondary{background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px 18px;font-weight:700}.questionTop{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:800;color:var(--muted)}.progress{height:7px;background:var(--soft);border-radius:9px;margin:17px 0 35px;overflow:hidden}.progress>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}.question{font-size:clamp(22px,4vw,31px);line-height:1.4;letter-spacing:-.035em;min-height:148px;margin:0 0 26px}.rating{text-align:center;background:var(--soft);border:1px solid var(--line);padding:18px 15px;border-radius:18px}.value{font-weight:900;font-size:62px;line-height:1.1;font-variant-numeric:tabular-nums}.feedback{font-size:13px;color:var(--accent);font-weight:800;margin:7px 0 12px}input[type=range]{width:100%;accent-color:var(--accent);height:34px;cursor:pointer;touch-action:pan-y}.ends{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.actions{display:flex;gap:10px;margin-top:24px}.actions .primary{flex:1}.score{color:var(--accent);font-size:34px;font-weight:900;letter-spacing:-.04em}.resultHead{display:flex;justify-content:space-between;align-items:center;gap:12px}.winner{font-size:clamp(43px,10vw,76px);letter-spacing:-.065em;overflow-wrap:anywhere;margin:18px 0 5px}.country{color:var(--muted);font-weight:700}.description{line-height:1.75;color:var(--muted);font-size:15px}.why{background:var(--soft);border-left:3px solid var(--accent);border-radius:10px;padding:17px;line-height:1.6;margin:20px 0}.places{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.place{border:1px solid var(--line);border-radius:12px;padding:13px;color:var(--text);text-decoration:none;font-size:13px;font-weight:600;line-height:1.4}.place:hover{border-color:var(--accent);background:var(--soft)}h3{margin:25px 0 14px;font-size:17px}.alternatives{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.alt{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:18px}.alt h3{margin:0 0 8px}.alt p{color:var(--muted);line-height:1.55;font-size:12px;margin:0}.altTop{display:flex;justify-content:space-between;gap:8px}.altTop strong{color:var(--accent)}.foot{text-align:center;color:var(--muted);font-size:12px;margin-top:30px}.foot b{color:var(--accent)}.note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:14px}.resultActions{display:flex;gap:10px;margin-top:20px}.resultActions>*{flex:1}
+@media(max-width:550px){.top{margin-bottom:35px}.wrap{padding:16px 13px 45px}.pill{padding:9px 11px}.places,.alternatives{grid-template-columns:1fr}.question{min-height:175px}.features{gap:6px}.resultActions{flex-direction:column}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style></head><body>
+<div class="wrap"><header class="top"><a class="brand" href="https://gurkanlab.com">Gurkan<span>Lab</span></a><div class="topright"><a class="pill" href="https://gurkanlab.com">← Ana sayfa</a><button class="pill" id="themeToggle" aria-label="Temayı değiştir">☀ Açık</button></div></header>
+<section class="hero"><div class="eyebrow">GURKANLAB • KEŞİF</div><h1>City <span style="color:var(--accent)">Match.</span></h1><p class="sub">Hangi Avrupa şehri senin karakterine uyuyor? Seyahat tarzını keşfet, şehrini bul.</p></section>
+<main>
+<section class="card" id="intro"><div class="eyebrow">Şehrin ruhunu yakala</div><h2 style="font-size:clamp(24px,4vw,34px);letter-spacing:-.04em;margin:14px 0">Bir şehir, bin ihtimal. Hangisi senin?</h2><p class="description">Mimari, özgürlük, düzen, sosyal yaşam ve konfor tercihlerini 15 soruda değerlendiriyoruz. Doğa ve plajlardan çok, şehirlerin kendine özgü karakterine odaklanıyoruz.</p><div class="features"><div class="feature"><b>15</b><small>Soru</small></div><div class="feature"><b>30</b><small>Avrupa şehri</small></div><div class="feature"><b>6</b><small>Tercih boyutu</small></div></div><button class="primary" id="start">Analizi başlat →</button><p class="note">Bilimsel kişilik testi değildir. Yanıtlarına göre hazırlanmış keşif amaçlı bir eşleştirmedir.</p></section>
+<section class="card hidden" id="quiz"><div class="questionTop"><span id="counter">SORU 1 / 15</span><span id="percent">0% tamamlandı</span></div><div class="progress" aria-hidden="true"><div id="bar" style="width:0%"></div></div><h2 class="question" id="question"></h2><div class="rating"><div class="value" id="val">5</div><div class="feedback" id="feedback">Kararsızım</div><input id="slider" type="range" min="1" max="10" value="5" step="1" aria-label="Katılım düzeyi"><div class="ends"><span>1 · Kesinlikle katılmıyorum</span><span>10 · Kesinlikle katılıyorum</span></div></div><div class="actions"><button class="secondary" id="back">← Geri</button><button class="primary" id="next">Devam et →</button></div></section>
+<section class="hidden" id="result"><article class="card"><div class="resultHead"><span class="eyebrow">EN UYUMLU ŞEHRİN</span><span class="score" id="match"></span></div><h2 class="winner" id="winner"></h2><div class="country" id="country"></div><p class="description" id="desc"></p><div class="why" id="reason"></div><h3>📍 Şehirde keşfedebileceğin noktalar</h3><div class="places" id="places"></div><p class="note">Yüzdeler, şehir profilleriyle hesaplanan göreli benzerlik skorlarıdır; bilimsel doğruluk veya seyahat memnuniyeti olasılığı değildir.</p></article><h3>Diğer güçlü eşleşmeler</h3><div class="alternatives" id="alternatives"></div><div class="resultActions"><button class="primary" id="share">Sonucumu paylaş</button><button class="secondary" id="restart">↻ Yeniden analiz et</button></div></section>
+</main><footer class="foot">City Match · <b>created by gurkan</b> · GurkanLab</footer></div>
+<script>
+const cities = [
             { name: "Londra", country: "İngiltere", scores: [8, 9, 7, 8, 9, 9], desc: "Dünyanın kavşak noktası. Geleneksel kraliyet dokusu ile ultra-modern finans dünyasının, lüksün ve kaosun iç içe geçtiği kozmopolit bir dev.", places: ["British Museum", "Tate Modern", "Soho", "Covent Garden", "Sky Garden"], reason: "Kaos, tarih ve modernizmin mükemmel dengesini arıyorsanız adresiniz burası." },
             { name: "Berlin", country: "Almanya", scores: [9, 6, 6, 10, 5, 10], desc: "Avrupa'nın asi çocuğu. 'Yoksul ama seksi'. Özgürlükçü ruhu, tekno kulüpleri, sokak sanatı ve yakın tarihin ağır izleriyle yaşayan, asla uyumayan bir şehir.", places: ["East Side Gallery", "Berghain", "Brandenburg Kapısı", "Müzeler Adası", "Kreuzberg"], reason: "Kurallardan sıkıldıysanız ve bohem bir özgürlük arıyorsanız Berlin sizi çağırıyor." },
             { name: "Paris", country: "Fransa", scores: [10, 7, 6, 8, 10, 7], desc: "Estetik ve zarafetin başkenti. Her köşesi bir sanat eseri gibi olan, melankolik ama büyüleyici, entelektüel derinliği yüksek ve lüksün standart olduğu bir klasik.", places: ["Louvre Müzesi", "Le Marais", "Montmartre", "Musée d'Orsay", "Palais Garnier"], reason: "Estetik kaygınız yüksekse ve sanatsal bir derinlik arıyorsanız Paris kaçınılmazdır." },
@@ -206,8 +49,7 @@
             { name: "Sevilla", country: "İspanya", scores: [9, 5, 5, 6, 5, 9], desc: "Endülüs ateşi. Flamenko, portakal ağaçları ve Mağribi sarayları.", places: ["Alcázar", "Plaza de España", "Katedral", "Santa Cruz", "Metropol Parasol"], reason: "Oryantalist bir tarih, sıcakkanlı insanlar ve flamenko ruhu arıyorsanız Sevilla." },
             { name: "Cenevre", country: "İsviçre", scores: [6, 10, 1, 2, 10, 4], desc: "Diplomasinin merkezi. Göl kenarında, lüks ve sessiz bir sükunet.", places: ["Jet d'Eau", "Katedral", "Palais des Nations", "Patek Philippe Müzesi", "Jardin Anglais"], reason: "Entelektüel bir sükunet, lüks ve göl manzaralı bir dinginlik arıyorsanız Cenevre." }
         ];
-
-        const questions = [
+const questions = [
             { text: "Tatil, benim için yeni şeyler öğrenmek ve entelektüel olarak beslenmektir; sadece dinlenmek yetmez.", weights: {0: 2.0} },
             { text: "Eski, yıpranmış ve hikayesi olan binalar, beni yeni ve parlak gökdelenlerden daha çok etkiler.", weights: {0: 1.5, 1: -1.0} },
             { text: "Gittiğim şehirde her şeyin saat gibi işlemesini, sokakların tertemiz ve güvenli olmasını isterim.", weights: {1: 2.0, 2: -1.5} },
@@ -224,75 +66,19 @@
             { text: "Müze gezmektense, şehrin meydanında oturup saatlerce insanları izlemeyi tercih ederim.", weights: {5: 1.5, 0: -0.5} },
             { text: "Şehirde aristokratik bir hava, görkemli saraylar ve klasik bir ağırlık olmalı.", weights: {0: 1.0, 4: 1.0, 3: -1.0} }
         ];
-
-        let userVector = [5, 5, 5, 5, 5, 5]; 
-        let currentQIndex = 0;
-
-        function startQuiz() {
-            document.getElementById('intro-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            loadQuestion();
-        }
-
-        function loadQuestion() {
-            const q = questions[currentQIndex];
-            document.getElementById('q-current').innerText = currentQIndex + 1;
-            document.getElementById('question-text').innerText = q.text;
-            document.getElementById('rating-slider').value = 500;
-            updateVal(500);
-            document.getElementById('progress-bar').style.width = `${(currentQIndex / questions.length) * 100}%`;
-        }
-
-        function updateVal(val) {
-            let score = (val <= 500) ? 1 + (val / 500) * 4 : 5 + ((val - 500) / 500) * 5;
-            let final = Math.round(score);
-            document.getElementById('current-val').innerText = final;
-            const feedback = document.getElementById('slider-feedback');
-            feedback.style.opacity = '1';
-            feedback.innerText = (final <= 2) ? "Asla" : (final <= 4) ? "Pek Değil" : (final <= 6) ? "Nötr" : (final <= 8) ? "Katılıyorum" : "Kesinlikle";
-        }
-
-        function nextQuestion() {
-            let val = parseInt(document.getElementById('current-val').innerText);
-            let q = questions[currentQIndex];
-            let multiplier = (val - 5) / 2.5;
-            for (let i in q.weights) {
-                userVector[i] += q.weights[i] * multiplier;
-                userVector[i] = Math.max(0, Math.min(10, userVector[i]));
-            }
-            currentQIndex++;
-            if (currentQIndex < questions.length) loadQuestion();
-            else showResults();
-        }
-
-        function showResults() {
-            document.getElementById('quiz-screen').classList.add('hidden');
-            document.getElementById('loading-screen').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('result-screen').classList.remove('hidden');
-                const results = cities.map(c => {
-                    let d = Math.sqrt(c.scores.reduce((a, s, i) => a + Math.pow(s - userVector[i], 2), 0));
-                    return { ...c, match: Math.max(0, 100 - (d / 20 * 100)) };
-                }).sort((a, b) => b.match - a.match);
-                
-                const w = results[0];
-                document.getElementById('winner-name').innerText = w.name;
-                document.getElementById('winner-country').innerText = w.country;
-                document.getElementById('winner-match').innerText = `%${Math.round(w.match)}`;
-                document.getElementById('winner-desc').innerText = w.desc;
-                document.getElementById('winner-places').innerHTML = w.places.map(p => `
-                    <a href="https://www.google.com/maps/search/${encodeURIComponent(p + ' ' + w.name)}" target="_blank" class="place-link flex items-center p-3 bg-white/5 rounded-lg border border-white/5">
-                        <i class="fa-solid fa-location-dot text-indigo-400 mr-3"></i><span class="text-sm text-gray-200">${p}</span>
-                    </a>`).join('');
-                
-                document.getElementById('alternatives-grid').innerHTML = results.slice(1, 5).map(a => `
-                    <div class="glass-panel p-6 border-l-2 border-indigo-500">
-                        <div class="flex justify-between mb-2"><h4 class="text-xl font-bold text-white">${a.name}</h4><span class="text-indigo-400 font-mono">%${Math.round(a.match)}</span></div>
-                        <p class="text-xs text-gray-400">${a.reason}</p>
-                    </div>`).join('');
-            }, 1500);
-        }
-    </script>
-</body>
-</html>
+const $=id=>document.getElementById(id);const answers=Array(questions.length).fill(5);let index=0;let latest=null;
+function setTheme(t){document.documentElement.dataset.theme=t;localStorage.setItem('citymatch-theme',t);$('themeToggle').textContent=t==='dark'?'☀ Açık':'☾ Koyu'}
+setTheme(localStorage.getItem('citymatch-theme')|| (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
+$('themeToggle').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+function display(id){['intro','quiz','result'].forEach(s=>$(s).classList.toggle('hidden',s!==id));window.scrollTo({top:0,behavior:'smooth'})}
+function renderQuestion(){const n=answers.length;$('counter').textContent='SORU '+(index+1)+' / '+n;$('percent').textContent=Math.round(index/n*100)+'% tamamlandı';$('bar').style.width=(index/n*100)+'%';$('question').textContent=questions[index].text;$('slider').value=answers[index];updateRating();$('back').disabled=index===0;$('next').textContent=index===n-1?'Sonucu gör →':'Devam et →'}
+function updateRating(){const v=Number($('slider').value);$('val').textContent=v;$('feedback').textContent=v<=2?'Kesinlikle katılmıyorum':v<=4?'Katılmıyorum':v<=6?'Kararsızım':v<=8?'Katılıyorum':'Kesinlikle katılıyorum'}
+$('slider').addEventListener('input',updateRating);$('start').onclick=()=>{index=0;renderQuestion();display('quiz')};
+$('back').onclick=()=>{answers[index]=Number($('slider').value);if(index>0){index--;renderQuestion()}};
+$('next').onclick=()=>{answers[index]=Number($('slider').value);if(index<questions.length-1){index++;renderQuestion()}else renderResults()};
+function calculateVector(){const sums=Array(6).fill(0);questions.forEach((q,k)=>Object.entries(q.weights).forEach(([axis,w])=>{sums[Number(axis)]+=Number(w)*(answers[k]-5)/2.5}));return sums.map(s=>Math.max(0,Math.min(10,5+s)))}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function renderResults(){const vec=calculateVector();const maxDistance=Math.sqrt(6*100);const results=cities.map(c=>{const d=Math.sqrt(c.scores.reduce((sum,s,i)=>sum+(s-vec[i])**2,0));return {...c,match:Math.round(Math.max(0,100*(1-d/maxDistance)))}}).sort((a,b)=>b.match-a.match);const w=results[0];latest=w;$('match').textContent='%'+w.match;$('winner').textContent=w.name;$('country').textContent=w.country;$('desc').textContent=w.desc;$('reason').textContent=w.reason;$('places').innerHTML=w.places.map(p=>'<a class="place" target="_blank" rel="noopener noreferrer" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p+' '+w.name)+'">↗ '+esc(p)+'</a>').join('');$('alternatives').innerHTML=results.slice(1,5).map(a=>'<article class="alt"><div class="altTop"><h3>'+esc(a.name)+'</h3><strong>%'+a.match+'</strong></div><p>'+esc(a.reason)+'</p></article>').join('');display('result')}
+$('restart').onclick=()=>{answers.fill(5);index=0;latest=null;display('intro')};
+$('share').onclick=async()=>{if(!latest)return;const text='City Match sonucum: '+latest.name+' (%'+latest.match+' uyum). Senin şehrin hangisi?';try{if(navigator.share)await navigator.share({title:'City Match | GurkanLab',text,url:location.href});else if(navigator.clipboard){await navigator.clipboard.writeText(text+' '+location.href);$('share').textContent='Bağlantı kopyalandı ✓'}}catch(e){if(e.name!=='AbortError')alert('Paylaşım desteklenmiyor.')}}; 
+</script></body></html>
